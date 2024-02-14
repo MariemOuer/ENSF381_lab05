@@ -51,9 +51,26 @@ const showResult = (title, containerId, rows, cols, dataArray) => {
 };
 
 const showResult2D = (title, containerId, dataArray) => {
-	// dataArray is a 2D array
-	// complete this function based on the showResult function
-}
+    let container = document.getElementById(containerId);
+
+    if (typeof dataArray === 'string') {
+        container.innerHTML = `<p>${dataArray}</p>`; // Display error message if dataArray is a string
+        return;
+    }
+
+    let tableHTML = `<caption>${title}</caption><table>`;
+
+    for (let i = 0; i < dataArray.length; i++) {
+        tableHTML += '<tr>'; // Start a new row
+        for (let j = 0; j < dataArray[i].length; j++) {
+            tableHTML += `<td>${dataArray[i][j]}</td>`; // Add each data cell to the row
+        }
+        tableHTML += '</tr>'; // Close the row
+    }
+
+    tableHTML += '</table>';
+    container.innerHTML = tableHTML; // Set the inner HTML of the container to the constructed table
+};
 
 function performOperation(operation) {
     let matrix1 = getMatrixData2D('matrix1');
@@ -66,7 +83,27 @@ function performOperation(operation) {
     // Call your matrix calculation functions here
     // For example: if (operation === 'add') { addMatrices(matrix1, matrix2); }
 	// prints suitable messages for impossible situation
-    showResult('The Result', 'matrix3', 2, 4, result); // use suitable function for printing results
+    switch(operation) {
+        case 'add':
+            result = addMatrices(matrix1, matrix2);
+            break;
+        case 'subtract':
+            result = subtractMatrices(matrix1, matrix2);
+            break;
+        case 'multiply':
+            result = multiplyMatrices(matrix1, matrix2);
+            break;
+        default:
+            alert("Error");
+            // The initial test result will be used here
+    }
+    if (result !== null) {
+        showResult2D('The Result', 'matrix3', result);
+    } else {
+        alert("Error: Operation is not performed due invalid dimentions.");
+    }
+
+    // Use showResult for displaying the results, assuming the result is always a 1D array with 8 elements
 }
 
 const getMatrixData1D = function (matrixId) {
@@ -103,12 +140,42 @@ const getMatrixData2D = function (matrixId) {
 
 // Add your matrix calculation functions here
 // The functions must check the posibility of calculation too.
-function addMatrices(matrix1, matrix2){ 
-	// provide the code
+function addMatrices(matrix1, matrix2) {
+    if (matrix1.length !== matrix2.length || matrix1[0].length !== matrix2[0].length) {
+        console.log("Error, unable to complete addition");
+        return null;
+    }
+
+    return matrix1.map((row, i) => 
+        row.map((value, j) => value + matrix2[i][j])
+    );
 }
+
 const subtractMatrices = function (matrix1, matrix2) { 
 	// provide the code
-};
+    if (matrix1.length !== matrix2.length || matrix1[0].length !== matrix2[0].length) {
+        console.log("Error");
+        return null;
+    }
+
+    return matrix1.map((row, i) =>
+        row.map((value, j) => value - matrix2[i][j])
+    );
+}
 const multiplyMatrices = (matrix1, matrix2) => { 
 	// provide the code
-};
+    if (matrix1[0].length !== matrix2.length) {
+        console.log("Error, incompatible matrix dimensions for multiplication");
+        return null;
+    }
+
+    return matrix1.map((row, i) => {
+        return matrix2[0].map((_, j) => {
+            let sum = 0;
+            for (let k = 0; k < matrix1[0].length; k++) {
+                sum += row[k] * matrix2[k][j];
+            }
+            return sum;
+        });
+    });
+}
